@@ -1,7 +1,9 @@
 package logflow.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 
@@ -29,6 +31,25 @@ class LogRecordTest {
         LogRecord r = b.build();
         b.attribute("later", "value");
         assertEquals(1, r.attributes().size());
+    }
+
+    @Test
+    void toBuilderCopiesAndExtends() {
+        LogRecord r = sample().build();
+        LogRecord extended = r.toBuilder().attribute("geo", "TR").build();
+
+        assertEquals("TR", extended.attribute("geo"));
+        assertEquals(r.clientIp(), extended.clientIp());
+        assertEquals(1, r.attributes().size(), "original stays unchanged");
+        assertNotEquals(r, extended);
+    }
+
+    @Test
+    void equalsAndHashCodeUseAllFields() {
+        assertEquals(sample().build(), sample().build());
+        assertEquals(sample().build().hashCode(), sample().build().hashCode());
+        assertNotEquals(sample().build(), sample().status(404).build());
+        assertTrue(sample().build().toString().contains("clientIp=10.0.0.1"));
     }
 
     @Test

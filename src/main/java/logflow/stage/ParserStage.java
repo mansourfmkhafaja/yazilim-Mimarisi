@@ -32,10 +32,12 @@ public final class ParserStage implements Stage<String, LogRecord> {
     private static final DateTimeFormatter TIME =
             DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
 
+    private long parsed;
     private long malformed;
 
     @Override
     public void open() {
+        parsed = 0;
         malformed = 0;
     }
 
@@ -44,9 +46,15 @@ public final class ParserStage implements Stage<String, LogRecord> {
         LogRecord record = parse(line);
         if (record == null) {
             malformed++;
-        } else {
-            out.emit(record);
+            return;
         }
+        parsed++;
+        out.emit(record);
+    }
+
+    /** Number of lines that were turned into records. */
+    public long parsedCount() {
+        return parsed;
     }
 
     /** Number of lines that were skipped because they could not be parsed. */

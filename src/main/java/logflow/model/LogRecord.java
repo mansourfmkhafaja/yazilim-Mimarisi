@@ -1,10 +1,8 @@
 package logflow.model;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -49,6 +47,15 @@ public final class LogRecord implements Record {
         return new Builder();
     }
 
+    /** A builder pre-filled with this record's values — the way to "modify" an immutable record. */
+    public Builder toBuilder() {
+        Builder b = new Builder()
+                .timestamp(timestamp).clientIp(clientIp).method(method).path(path)
+                .status(status).bytes(bytes).userAgent(userAgent).raw(raw);
+        b.attributes.putAll(attributes);
+        return b;
+    }
+
     public Instant timestamp() { return timestamp; }
     public String clientIp() { return clientIp; }
     public String method() { return method; }
@@ -63,27 +70,25 @@ public final class LogRecord implements Record {
         return attributes.get(key);
     }
 
-    /** Field names a config file may use (filter / project). */
-    public static final List<String> FIELDS = Arrays.asList(
-            "timestamp", "clientIp", "method", "path", "status", "bytes", "userAgent",
-            "protocol", "query", "referer");
+    @Override
+    public String raw() { return raw; }
 
-    /** Returns any field by name as text; attributes that are absent give "-". */
-    public String field(String name) {
-        switch (name) {
-            case "timestamp": return timestamp.toString();
-            case "clientIp":  return clientIp;
-            case "method":    return method;
-            case "path":      return path;
-            case "status":    return String.valueOf(status);
-            case "bytes":     return String.valueOf(bytes);
-            case "userAgent": return userAgent;
-            default:          return attributes.getOrDefault(name, "-");
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LogRecord)) return false;
+        LogRecord r = (LogRecord) o;
+        return status == r.status && bytes == r.bytes
+                && timestamp.equals(r.timestamp) && clientIp.equals(r.clientIp)
+                && method.equals(r.method) && path.equals(r.path)
+                && userAgent.equals(r.userAgent) && attributes.equals(r.attributes)
+                && raw.equals(r.raw);
     }
 
     @Override
-    public String raw() { return raw; }
+    public int hashCode() {
+        return Objects.hash(timestamp, clientIp, method, path, status, bytes, userAgent, attributes, raw);
+    }
 
     @Override
     public String toString() {

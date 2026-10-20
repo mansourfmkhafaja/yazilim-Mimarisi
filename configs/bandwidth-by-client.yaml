@@ -1,4 +1,4 @@
-# Bandwidth-by-client extract: who downloaded how many bytes (responses with a body only), written to out/bandwidth.txt and printed in the terminal.
+# Bandwidth-by-client extract: who downloaded how many bytes (responses with a body only).
 pipeline:
   name: bandwidth-by-client
   source:
@@ -12,4 +12,4 @@ pipeline:
       params: { fields: [clientIp, bytes] }
   sink:
     type: file
-    params: { path: out/bandwidth.txt, echo: true }   # echo: also print in the terminal
+    params: { path: out/bandwidth.txt }
